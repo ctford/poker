@@ -1,6 +1,6 @@
-(ns poker.core-test
+(ns poker.test.refactor
   (:use midje.sweet)
-  (:require [poker.core :as refactor]))
+  (:require [poker.refactor :as refactor]))
 
 (fact "Unthreading replaces a ->> pipeline with nested forms." 
   (refactor/unthread '(->> [2 3] (map inc) (filter even?))) =>

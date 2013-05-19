@@ -1,4 +1,4 @@
-(ns poker.core)
+(ns poker.refactor)
 
 (defn threaded-first? [form] (-> form first (= '->)))
 (defn threaded-last? [form] (-> form first (= '->>)))
