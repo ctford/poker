@@ -1,7 +1,7 @@
 (ns poker.refactor)
 
-(defn threaded-first? [form] (-> form first (= '->)))
-(defn threaded-last? [form] (-> form first (= '->>)))
+(defn threaded-first? [form] (-> form first #{'-> 'clojure.core/->}))
+(defn threaded-last? [form] (-> form first #{'->> 'clojure.core/->>}))
 
 (defn append [x xs] (concat xs (list x)))
 (defn splice-second [x xs] (concat (take 1 xs) (list x) (rest xs)))
