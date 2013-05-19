@@ -18,6 +18,10 @@
   (refactor/thread-last '(filter even? (map inc [2 3]))) =>
   '(->> [2 3] (map inc) (filter even?)))
 
+(fact "Threading-last produces naked fns where it can." 
+  (refactor/thread-last '(first [2 3])) =>
+  '(->> [2 3] first))
+
 (fact "Unthreading replaces a -> pipeline with nested forms." 
   (refactor/unthread '(-> {:foo 2} (assoc :bar 1) (update-in [:foo] inc))) =>
   '(update-in (assoc {:foo 2} :bar 1) [:foo] inc))
@@ -33,3 +37,7 @@
 (fact "Threading-first replaces nested forms with a -> pipeline." 
   (refactor/thread-first '(update-in (assoc {:foo 2} :bar 1) [:foo] inc)) =>
   '(-> {:foo 2} (assoc :bar 1) (update-in [:foo] inc)))
+
+(fact "Threading-first produces naked fns where it can." 
+  (refactor/thread-first '(inc 1)) =>
+  '(-> 1 inc))
