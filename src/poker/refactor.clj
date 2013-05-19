@@ -1,28 +1,35 @@
 (ns poker.refactor)
 
-(defn threaded-first? [form] (-> form first #{'-> 'clojure.core/->}))
-(defn threaded-last? [form] (-> form first #{'->> 'clojure.core/->>}))
+(defn- splice-second [x [y & ys]] (cons y (cons x ys)))
+(defn- append [x ys] (concat ys (list x)))
 
-(defn append [x xs] (concat xs (list x)))
-(defn splice-second [x xs] (concat (take 1 xs) (list x) (rest xs)))
-(defn listify [xs] (if (list? xs) xs (list xs)))
-(defn delistify [xs] (if (rest xs) xs (first xs)))
+(defn unthread [[arrow value & transformations :as form]]
+  (let [single? #{'-> 'clojure.core/->}
+        double? #{'->> 'clojure.core/->>}
+        listify (fn [xs] (if (list? xs) xs (list xs)))
+        inner-forms (map listify transformations)]
+    (cond
+      (single? arrow) (reduce splice-second value inner-forms)
+      (double? arrow) (reduce append value inner-forms)
+      :otherwise form)))
 
-(defn unthread [[maybe-arrow value & transformations :as form]]
-  (cond
-    (threaded-first? form) (reduce splice-second value (map listify transformations))
-    (threaded-last? form) (reduce append value (map listify transformations))
-    :otherwise form))
+(defn- de-nest-with [split form]
+  (let [[inner outer] (split form)]
+    (if (list? inner)
+      (-> (de-nest-with split inner)
+          (update-in [:transformations] (partial append outer)))
+      {:value inner :transformations (list outer)})))
+
+(defn- delistify [[x & xs :as form]] (if xs form x))
 
 (defn thread-last [form]
-  (if-not (list? (last form))
-    (list '->> (last form) (drop-last form)) 
-    (concat (thread-last (last form)) (list (drop-last form)))))
+  (let [split-last (fn [form] [(last form) (drop-last form)])
+        {:keys [value transformations]} (de-nest-with split-last form)
+        inner-forms (map delistify transformations)]
+    (cons '->> (cons value inner-forms))))
 
 (defn thread-first [form]
-  (cons '->
-    ((fn inner [form]
-      (if-not (list? (second form))
-        (list (second form) (cons (first form) (drop 2 form))) 
-        (concat (inner (second form))(list (cons (first form) (drop 2 form))))))
-     form)))
+  (let [split-second (fn [[one two & others]] [two (cons one others)])
+        {:keys [value transformations]} (de-nest-with split-second form)
+        inner-forms (map delistify transformations)]
+    (cons '-> (cons value inner-forms))))
