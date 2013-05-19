@@ -11,7 +11,7 @@
   '(filter even? (map inc [2 3])))
 
 (fact "Unthreading ->> understands naked fns." 
-  (refactor/unthread '(clojure.core/->> [2 3] first)) =>
+  (refactor/unthread '(->> [2 3] first)) =>
   '(first [2 3]))
 
 (fact "Threading-last replaces nested forms with a ->> pipeline." 
@@ -31,7 +31,7 @@
   '(update-in (assoc {:foo 2} :bar 1) [:foo] inc))
 
 (fact "Unthreading -> understands naked fns." 
-  (refactor/unthread '(clojure.core/-> 1 inc)) =>
+  (refactor/unthread '(-> 1 inc)) =>
   '(inc 1))
 
 (fact "Threading-first replaces nested forms with a -> pipeline." 
