@@ -24,12 +24,12 @@
       {:value inner :transformations (list outer)})))
 
 (defn- delistify [[x & xs :as form]] (if xs form x))
+(defn- split-last [form] [(last form) (drop-last form)]) 
 
 (defn thread-last
   "Returns the ->> equivalent of the nested form."
   [form]
-  (let [split-last (fn [form] [(last form) (drop-last form)])
-        {:keys [value transformations]} (de-nest-with split-last form)
+  (let [{:keys [value transformations]} (de-nest-with split-last form)
         inner-forms (map delistify transformations)]
     (cons '->> (cons value inner-forms))))
 
@@ -40,3 +40,12 @@
         {:keys [value transformations]} (de-nest-with split-second form)
         inner-forms (map delistify transformations)]
     (cons '-> (cons value inner-forms))))
+
+(defn thread
+  "Threads-last if there's a sequential value in the right place,
+  otherwise threads-first."
+  [form]
+  (let [{value :value} (de-nest-with split-last form)]
+    (if (sequential? value)
+      (thread-last form)
+      (thread-first form))))

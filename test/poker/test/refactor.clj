@@ -41,3 +41,11 @@
 (fact "Threading-first produces naked fns where it can." 
   (refactor/thread-first '(inc 1)) =>
   '(-> 1 inc))
+
+(fact "Thread uses thread-last where the value is sequential."
+  (refactor/thread '(filter even? (map inc [2 3]))) =>
+  '(->> [2 3] (map inc) (filter even?)))
+
+(fact "Thread uses thread-first where the value isn't sequential."
+  (refactor/thread '(update-in (assoc {:foo 2} :bar 1) [:foo] inc)) =>
+  '(-> {:foo 2} (assoc :bar 1) (update-in [:foo] inc)))
