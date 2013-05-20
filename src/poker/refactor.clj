@@ -49,3 +49,13 @@
     (if (sequential? value)
       (thread-last form)
       (thread-first form))))
+
+(defn- replace-all [needle name haystack]
+  (cond (= needle haystack) name 
+        (list? haystack) (map (partial replace-all needle name) haystack)
+        :otherwise haystack))
+
+(defn extract-local [form name outer]
+  (append (list 'let `[~name ~form]
+                (replace-all form name (last outer)))
+          (drop-last outer)))
