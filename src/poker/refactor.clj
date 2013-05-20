@@ -59,3 +59,8 @@
   (append (list 'let `[~name ~form]
                 (replace-all form name (last outer)))
           (drop-last outer)))
+
+(defn inline-local [name outer]
+  (append
+    (replace-all name (second (second (last outer))) (last (last outer)))
+    (drop-last outer)))

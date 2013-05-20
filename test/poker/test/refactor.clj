@@ -54,6 +54,10 @@
   (refactor/thread '(cons (+ 1 1) (map inc [2 3]))) =>
   '(->> [2 3] (map inc) (cons (+ 1 1))))
 
+(fact "Inlining-locally replaces occurances of bindings from a wrapping let."
+   (refactor/inline-local 'double-x '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x)))) =>
+   '(defn foo [x] (* 3 (+ x x))))
+
 (fact "Extracting-locally pulls the targetted form into a let binding."
    (refactor/extract-local '(+ x x) 'double-x '(defn foo [x] (* 3 (+ x x)))) =>
    '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x))))
