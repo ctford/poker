@@ -49,3 +49,7 @@
 (fact "Thread uses thread-first where the value isn't sequential."
   (refactor/thread '(update-in (assoc {:foo 2} :bar 1) [:foo] inc)) =>
   '(-> {:foo 2} (assoc :bar 1) (update-in [:foo] inc)))
+
+(fact "Thread prefers thread-last where both could apply."
+  (refactor/thread '(cons (+ 1 1) (map inc [2 3]))) =>
+  '(->> [2 3] (map inc) (cons (+ 1 1))))
