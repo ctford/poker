@@ -56,20 +56,16 @@
 
 (fact "Inlining-locally replaces occurances of bindings from a wrapping let."
    (refactor/inline-local
-     'double-x
-     '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x)))) =>
+     'double-x '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x)))) =>
    '(defn foo [x] (* 3 (+ x x)))
    (refactor/inline-local
-     'double-x
-     '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x double-x)))) =>
+     'double-x '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x double-x)))) =>
    '(defn foo [x] (* 3 (+ x x) (+ x x))))
 
-(fact "Extracting-locally pulls the targetted form into a let binding."
+(fact "Extracting-locally pulls the targeted form into a let binding."
    (refactor/extract-local
-     '(+ x x)
-     'double-x '(defn foo [x] (* 3 (+ x x)))) =>
+     '(+ x x) 'double-x '(defn foo [x] (* 3 (+ x x)))) =>
    '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x)))
    (refactor/extract-local
-     '(+ x x)
-     'double-x '(defn foo [x] (* 3 (+ x x) (+ x x)))) =>
+     '(+ x x) 'double-x '(defn foo [x] (* 3 (+ x x) (+ x x)))) =>
    '(defn foo [x] (let [double-x (+ x x)] (* 3 double-x double-x))))

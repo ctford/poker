@@ -53,9 +53,11 @@
       (thread-first form))))
 
 (defn extract-local [form name outer]
-  (append (list 'let `[~name ~form]
-                (walk/prewalk-replace {form name} (last outer)))
-          (drop-last outer)))
+  (-> (zip/seq-zip outer) 
+      zip/down
+      zip/rightmost
+      (zip/edit #(list 'let `[~name ~form] (walk/prewalk-replace {form name} %)))
+      zip/root))
 
 (defn inline-local [name outer]
   (append
