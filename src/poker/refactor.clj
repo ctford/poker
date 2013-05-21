@@ -1,4 +1,6 @@
-(ns poker.refactor)
+(ns poker.refactor
+  (:require [clojure.zip :as zip]
+            [clojure.walk :as walk]))
 
 (defn- splice-second [x [y & ys]] (cons y (cons x ys)))
 (defn- append [x ys] (concat ys (list x)))
@@ -50,17 +52,12 @@
       (thread-last form)
       (thread-first form))))
 
-(defn- replace-all [needle name haystack]
-  (cond (= needle haystack) name 
-        (list? haystack) (map (partial replace-all needle name) haystack)
-        :otherwise haystack))
-
 (defn extract-local [form name outer]
   (append (list 'let `[~name ~form]
-                (replace-all form name (last outer)))
+                (walk/prewalk-replace {form name} (last outer)))
           (drop-last outer)))
 
 (defn inline-local [name outer]
   (append
-    (replace-all name (second (second (last outer))) (last (last outer)))
+    (walk/prewalk-replace {name (second (second (last outer)))} (last (last outer)))
     (drop-last outer)))
