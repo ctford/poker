@@ -52,15 +52,17 @@
       (thread-last form)
       (thread-first form))))
 
-(defn- body [form-seq] (-> form-seq zip/down zip/rightmost))
+(defn- to-body [form-seq] (-> form-seq zip/down zip/rightmost))
 
 (defn extract-local [form name outer]
   (-> (zip/seq-zip outer) 
-      body
+      to-body
       (zip/edit #(list 'let `[~name ~form] (walk/prewalk-replace {form name} %)))
       zip/root))
 
 (defn inline-local [name outer]
-  (append
-    (walk/prewalk-replace {name (second (second (last outer)))} (last (last outer)))
-    (drop-last outer)))
+  (-> (zip/seq-zip outer)
+      to-body
+      (zip/edit
+        #(walk/prewalk-replace {name (second (second %))} (last %)))
+      zip/root))
