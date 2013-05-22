@@ -52,10 +52,11 @@
       (thread-last form)
       (thread-first form))))
 
+(defn- body [form-seq] (-> form-seq zip/down zip/rightmost))
+
 (defn extract-local [form name outer]
   (-> (zip/seq-zip outer) 
-      zip/down
-      zip/rightmost
+      body
       (zip/edit #(list 'let `[~name ~form] (walk/prewalk-replace {form name} %)))
       zip/root))
 
