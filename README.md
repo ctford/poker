@@ -3,11 +3,7 @@ Poker
 
 [![Build Status](https://travis-ci.org/ctford/poker.png)](https://travis-ci.org/ctford/poker)
 
-A macro-based refactoring library for Clojure.
-
-Actually, there are no macros as such, but Poker uses
-the macro approach of rewriting s-expressions to achieve
-its transformations.
+Poker implements refactorings as transformations of s-expressions.
 
 Design
 ------
